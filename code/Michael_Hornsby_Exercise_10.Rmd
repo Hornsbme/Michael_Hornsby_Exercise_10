@@ -3,3 +3,66 @@ title: "Michael Hornsby EDRM 718 Exercise 10"
 output: html_notebook
 ---
 
+```{r include=FALSE}
+library(here)
+library(tidyverse)
+library(ggrepel)
+library(scales)
+library(readxl)
+library(purrr)
+```
+
+Number 1
+
+```{r include=FALSE}
+elem <- as.tibble(read_csv(here("data", "Johnson_Elementary.csv")))
+
+elem <- elem[4:220,]
+names(elem) <- c("room", "student_id", "tardies;absences",
+                 "quarter1", "quarter2", "quarter3", "quarter4")
+
+for (i in 2:nrow(elem)) {
+  if (is.na(elem$room[i]) == TRUE) {
+    elem$room[i] = elem$room[i-1]
+  }
+}
+
+elem <- elem[c(-1, -22, -45, -69, -93, -116, -130, -154, -174, -196),]
+
+elem <- elem %>%
+  separate(`tardies;absences`, into = c("tardies", "absences"), sep = ";")
+
+elem$tardies <- parse_integer(elem$tardies)
+elem$absences <- parse_integer(elem$absences)
+elem$quarter1 <- parse_integer(elem$quarter1)
+elem$quarter2 <- parse_integer(elem$quarter2)
+elem$quarter3 <- parse_integer(elem$quarter3)
+elem$quarter4 <- parse_integer(elem$quarter4)
+```
+
+I know this almost certainly isn't the exact way you wanted us to do this
+part (espeically my line 29).  I did these steps becuase I wanted to do EVERY
+step in R.  I feel like even a little, easy manipulation of the excel
+spreadsheet would have made some of the tidyverse tools more applicable
+or straightfoward, but I felt like that may have been cheating.
+
+
+Number 2
+
+My script for number 2 requires the purrr package.  
+
+```{r}
+elem %>% split(elem$room) %>% map(summary)
+```
+
+
+Number 3
+
+```{r}
+aggregate(quarter1 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
+aggregate(quarter2 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
+aggregate(quarter3 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
+aggregate(quarter4 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
+
+```
+

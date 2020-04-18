@@ -38,10 +38,15 @@ elem$quarter1 <- parse_integer(elem$quarter1)
 elem$quarter2 <- parse_integer(elem$quarter2)
 elem$quarter3 <- parse_integer(elem$quarter3)
 elem$quarter4 <- parse_integer(elem$quarter4)
+
+tidy_elem <- elem %>%
+  gather(`quarter1`, `quarter2`, `quarter3`, `quarter4`,
+         key = "quarter",
+         value = "rating")
 ```
 
 I know this almost certainly isn't the exact way you wanted us to do this
-part (espeically my line 29).  I did these steps becuase I wanted to do EVERY
+part.  I did these steps becuase I wanted to do EVERY
 step in R.  I feel like even a little, easy manipulation of the excel
 spreadsheet would have made some of the tidyverse tools more applicable
 or straightfoward, but I felt like that may have been cheating.
@@ -49,7 +54,9 @@ or straightfoward, but I felt like that may have been cheating.
 
 Number 2
 
-My script for number 2 requires the purrr package.  
+My script for number 2 requires the purrr package (I couldn't tell if the purrr
+package was already a part of the tidyverse package or not.
+The warning message was a little confusing.).  
 
 ```{r}
 elem %>% split(elem$room) %>% map(summary)
@@ -64,5 +71,24 @@ aggregate(quarter2 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = N
 aggregate(quarter3 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
 aggregate(quarter4 ~ room, data=elem, function(x) {sum(is.na(x))}, na.action = NULL)
 
+```
+
+
+Number 4
+
+```{r}
+medians <- aggregate(rating ~ quarter*room, tidy_elem, median)
+
+ggplot(data=medians, aes(x=quarter, y=rating, group=room)) +
+  geom_line(aes(color= room)) +
+  geom_point() +
+  labs(title = "Line Plot of Rating by Quarter with Room Groups")
+```
+
+
+Number 5
+
+```{r}
+flights <- as.tibble(read_csv(here("data", "flights.csv")))
 ```
 
